@@ -1,36 +1,47 @@
-import requests
 import pandas as pd
 import os
 
-os.makedirs("data/raw", exist_ok=True)
+RAW_DATA_PATH = "data/raw"
 
-# Step 1: API se CSV fetch karo
-schemes = {
-    "HDFC_Top100": 125497,
-    "SBI_Bluechip": 119551,
-    "ICICI_Bluechip": 120503,
-    "Nippon_LargeCap": 118632,
-    "Axis_Bluechip": 119092,
-    "Kotak_Bluechip": 120841
-}
+csv_files = [
+    "01_fund_master.csv",
+    "02_nav_history.csv",
+    "03_aum_by_fund_house.csv",
+    "04_monthly_sip_inflows.csv",
+    "05_category_inflows.csv",
+    "06_industry_folio_count.csv",
+    "07_scheme_performance.csv",
+    "08_investor_transactions.csv",
+    "09_portfolio_holdings.csv",
+    "10_benchmark_indices.csv"
+]
 
-for name, code in schemes.items():
-    url = f"https://api.mfapi.in/mf/{code}"
-    response = requests.get(url)
-    data = response.json()
-    df = pd.DataFrame(data['data'])
-    df['scheme_name'] = data['meta']['scheme_name']
-    filename = f"data/raw/{name}.csv"
-    df.to_csv(filename, index=False)
-    print(f"Saved: {filename}")
+dataframes = {}
 
-# Step 2: Har CSV load karke info print karo
-print("\n--- CSV FILES INFO ---\n")
-for name in schemes.keys():
-    filename = f"data/raw/{name}.csv"
-    df = pd.read_csv(filename)
-    print(f"File: {name}")
-    print(f"Shape: {df.shape}")
-    print(f"Dtypes:\n{df.dtypes}")
-    print(f"Head:\n{df.head()}")
-    print("-" * 50)
+print("=" * 80)
+print("DATA INGESTION REPORT")
+print("=" * 80)
+
+for file_name in csv_files:
+    file_path = os.path.join(RAW_DATA_PATH, file_name)
+    try:
+        df = pd.read_csv(file_path)
+        dataframes[file_name] = df
+
+        print(f"\n📄 File: {file_name}")
+        print("-" * 80)
+        print(f"Shape: {df.shape}")
+        print(f"\nData types:\n{df.dtypes}")
+        print(f"\nFirst 5 rows:\n{df.head()}")
+
+        missing = df.isnull().sum()
+        if missing.sum() > 0:
+            print(f"\n⚠️ Missing values:\n{missing[missing > 0]}")
+        else:
+            print("\n✅ No missing values.")
+    except Exception as e:
+        print(f"\n❌ Error loading {file_name}: {e}")
+
+print("\n" + "=" * 80)
+print("DATA INGESTION COMPLETE")
+print("=" * 80)

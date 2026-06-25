@@ -1,24 +1,41 @@
-import requests
 import pandas as pd
-import os
 
-os.makedirs("data/raw", exist_ok=True)
+# Load fund master CSV
+df = pd.read_csv("data/raw/01_fund_master.csv")
 
+print("=" * 80)
+print("FUND MASTER EXPLORATION REPORT")
+print("=" * 80)
 
-url = "https://api.mfapi.in/mf"
-response = requests.get(url)
-data = response.json()
+print(f"\nTotal schemes: {df.shape[0]}")
+print(f"Total columns: {df.shape[1]}")
+print(f"\nColumns: {list(df.columns)}")
 
-df = pd.DataFrame(data)
-print("Total funds:", len(df))
-print("\nColumns:", df.columns.tolist())
-print("\nHead:\n", df.head())
+# Unique fund houses
+print("\n" + "-" * 80)
+print(f"Unique Fund Houses ({df['fund_house'].nunique()}):")
+print(df['fund_house'].unique())
 
-df.to_csv("data/raw/fund_master.csv", index=False)
-print("\nFund master saved!")
+# Unique categories
+print("\n" + "-" * 80)
+print(f"Unique Categories ({df['category'].nunique()}):")
+print(df['category'].unique())
 
-print("\n--- UNIQUE VALUES ---")
-for col in df.columns:
-    print(f"{col}: {df[col].nunique()} unique values")
-    print(df[col].unique()[:5])
-    print()
+# Unique sub-categories
+print("\n" + "-" * 80)
+print(f"Unique Sub-Categories ({df['sub_category'].nunique()}):")
+print(df['sub_category'].unique())
+
+# Unique risk grades
+print("\n" + "-" * 80)
+print(f"Unique Risk Categories ({df['risk_category'].nunique()}):")
+print(df['risk_category'].unique())
+
+# AMFI scheme code structure
+print("\n" + "-" * 80)
+print("Sample AMFI Codes & SEBI Category Codes:")
+print(df[['amfi_code', 'scheme_name', 'sebi_category_code']].head(10))
+
+print("\n" + "=" * 80)
+print("FUND MASTER EXPLORATION COMPLETE")
+print("=" * 80)
