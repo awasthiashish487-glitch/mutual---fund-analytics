@@ -95,3 +95,14 @@ CREATE TABLE IF NOT EXISTS fact_portfolio (
     holding_date DATE,
     FOREIGN KEY (amfi_code) REFERENCES dim_fund(amfi_code)
 );
+-- Dimension Table: Date
+CREATE TABLE IF NOT EXISTS dim_date (
+    date_id TEXT PRIMARY KEY,
+    date DATE,
+    year INTEGER,
+    month INTEGER,
+    month_name TEXT,
+    quarter INTEGER,
+    day_of_week TEXT,
+    is_weekday INTEGER
+);

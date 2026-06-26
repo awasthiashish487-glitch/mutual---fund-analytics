@@ -60,6 +60,28 @@ print(f"✅ fact_sip_industry loaded: {sip.shape[0]} rows")
 portfolio = pd.read_csv("data/raw/09_portfolio_holdings.csv")
 portfolio.to_sql("fact_portfolio", conn, if_exists="replace", index=False)
 print(f"✅ fact_portfolio loaded: {portfolio.shape[0]} rows")
+# 9. Build and load dim_date (covering full NAV date range)
+nav_dates = pd.read_csv("data/processed/clean_nav.csv")
+nav_dates['date'] = pd.to_datetime(nav_dates['date'])
+
+min_date = nav_dates['date'].min()
+max_date = nav_dates['date'].max()
+
+date_range = pd.date_range(start=min_date, end=max_date, freq='D')
+
+dim_date = pd.DataFrame({'date': date_range})
+dim_date['date_id'] = dim_date['date'].dt.strftime('%Y%m%d')
+dim_date['year'] = dim_date['date'].dt.year
+dim_date['month'] = dim_date['date'].dt.month
+dim_date['month_name'] = dim_date['date'].dt.strftime('%B')
+dim_date['quarter'] = dim_date['date'].dt.quarter
+dim_date['day_of_week'] = dim_date['date'].dt.strftime('%A')
+dim_date['is_weekday'] = dim_date['date'].dt.weekday < 5
+dim_date['is_weekday'] = dim_date['is_weekday'].astype(int)
+
+dim_date = dim_date[['date_id', 'date', 'year', 'month', 'month_name', 'quarter', 'day_of_week', 'is_weekday']]
+dim_date.to_sql("dim_date", conn, if_exists="replace", index=False)
+print(f"✅ dim_date loaded: {dim_date.shape[0]} rows")
 
 conn.commit()
 conn.close()
